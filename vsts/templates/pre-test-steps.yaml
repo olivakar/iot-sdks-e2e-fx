@@ -7,6 +7,7 @@ parameters:
   image_edgeAgent: mcr.microsoft.com/azureiotedge-agent:1.0.6
   image_friendMod: $(IOTHUB-E2E-REPO-ADDRESS)/edge-e2e-node6
   test_image: ''
+  need_iot_edge: 'yes'
 
 steps:
 
@@ -24,15 +25,29 @@ steps:
 - script: |
     $(Horton.FrameworkRoot)/scripts/setup-iotedge.sh
   displayName: 'install iotedge packages'
-  condition: and(succeeded(), ne(variables['skipTest'],'yes'))
+  condition: and(
+        succeeded(), 
+        ne(variables['skipTest'],'yes'), 
+        eq(variables['needIotEdge'], 'yes')
+      )
+
+- script: |
+    docker login -u ${{ parameters.repo_user }} -p ${{ parameters.repo_password }} ${{ parameters.repo_address }} &&
+    docker pull ${{ parameters.image_edgeAgent }} &&
+    docker pull ${{ parameters.image_edgeHub }} 
+  displayName: 'pre-cache iotedge docker images'
+  condition: and(
+        succeeded(), 
+        ne(variables['skipTest'],'yes'), 
+        eq(variables['needIotEdge'], 'yes')
+      )
+
 
 - script: |
     docker login -u ${{ parameters.repo_user }} -p ${{ parameters.repo_password }} ${{ parameters.repo_address }} &&
     docker pull ${{ parameters.repo_address }}/${{ parameters.language }}-e2e-v2:${{ parameters.test_image }} &&
-    docker pull ${{ parameters.image_edgeAgent }} &&
-    docker pull ${{ parameters.image_edgeHub }} &&
     docker pull ${{ parameters.image_friendmod }} 
-  displayName: 'pre-cache docker images'
+  displayName: 'pre-cache test docker images'
   condition: and(succeeded(), ne(variables['skipTest'],'yes'))
 
 - script: |
@@ -48,7 +63,7 @@ steps:
 
 - script: |
     python3 $(Horton.FrameworkRoot)/test-runner/deploy_test_containers.py --friend --${{ parameters.language }} ${{ parameters.repo_address }}/${{ parameters.language }}-e2e-v2:${{ parameters.test_image }}
-  displayName: 'Deploy manifest (${{ parameters.test_image }})'
+  displayName: 'Deploy iotedge manifest'
   env:
     IOTHUB_E2E_CONNECTION_STRING: $(IOTHUB-E2E-CONNECTION-STRING)
     IOTHUB_E2E_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
@@ -60,12 +75,20 @@ steps:
 - script: |
     $(Horton.FrameworkRoot)/scripts/verify-deployment.sh edgeHub ${{ parameters.image_edgeHub }}
   displayName: 'Verify edgeHub deployment'
-  condition: and(succeeded(), ne(variables['skipTest'],'yes'))
+  condition: and(
+        succeeded(), 
+        ne(variables['skipTest'],'yes'), 
+        eq(variables['needIotEdge'], 'yes')
+      )
 
 - script: |
     $(Horton.FrameworkRoot)/scripts/verify-deployment.sh edgeAgent ${{ parameters.image_edgeAgent }}
   displayName: 'Verify edgeAgent deployment'
-  condition: and(succeeded(), ne(variables['skipTest'],'yes'))
+  condition: and(
+        succeeded(), 
+        ne(variables['skipTest'],'yes'), 
+        eq(variables['needIotEdge'], 'yes')
+      )
 
 - script: |
     $(Horton.FrameworkRoot)/scripts/verify-deployment.sh friendMod ${{ parameters.image_friendMod }}

@@ -99,9 +99,16 @@ steps:
     }
     $LogFolderName=$LogFolderName + "_" + $env:SYSTEM_JOBPOSITIONINPHASE
 
+    # decide what image to use
     $TestImage=$env:DefaultImage
     if ($env:ForcedImage -ne "") {
       $TestImage=$env:ForcedImage
+    }
+
+    # do we need iotedge or can get by with docker containers?
+    $NeedIotEdge="yes"
+    if ($TestSet -eq "iothub_module") {
+      $NeedIotEdge="no"
     }
 
     Write-Host "##vso[task.setvariable variable=junitSuiteName]${JunitSuiteName}"
@@ -111,6 +118,7 @@ steps:
     Write-Host "##vso[task.setvariable variable=transport]${Transport}"
     Write-Host "##vso[task.setvariable variable=testArgs]${TestArgs}"
     Write-Host "##vso[task.setvariable variable=testImage]${TestImage}"
+    Write-Host "##vso[task.setvariable variable=needIotEdge]${NeedIotEdge}"
 
     Write-Host "AgentJobName=${env:AGENT_JOBNAME}"
     Write-Host "JunitSuiteName=${JunitSuiteName}"
@@ -120,6 +128,7 @@ steps:
     Write-Host "Transport=${Transport}"
     Write-Host "TestArgs=${TestArgs}"
     Write-Host "TestImage=${TestImage}"
+    Write-Host "NeedIotEdge=${NeedIotEdge}"
 
   displayName: Custom task execution logic
   env:
