@@ -1,4 +1,4 @@
-name: $(BuildID)_$(Horton.Language)_$(Horton.Commit)
+name: $(BuildID)_$(BuildDefinitionName)_$(Horton.Language)_$(Horton.Commit)
 variables:
   Horton.FrameworkRoot: $(Build.SourcesDirectory)
 
