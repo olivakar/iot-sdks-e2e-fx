@@ -31,12 +31,39 @@ The fact that friendMod is an Edge module, and also a leaf device and an impleme
 
 ## Test Environments
 
+Edge Tests are currently being run only under AMD64 Linux (16.04) with the following Docker containers.  Base container choices are somewhat arbitrary.
+
+| SDK | Docker Base Image Name | OS | Language Variant |
+| -- | -- | -- | -- |
+| C | ubuntu:18.04 | Ubuntu 18.04 | GCC |
+| CSharp | microsoft/dotnet:2.2-sdk | Debian Stretch (v9) | .net core 2.2 |
+| Java | maven:3.3-jdk-8 | Debian Jesie (v8) | JDK-8 |
+| Node | node:6-slim | Debian Stretch (v9)| Node 6.17 |
+| Python | ubuntu:18.04 | Ubuntu 18.04 | GCC + Python 3.6 |
+| Python-preview |  python:3.6 | Debian Stretch (v9) | Python 3.6.8 |
+
 ## Test Suites (or "the matrix of suites")
 
+Tests for the Module Client SDK are run using both EdgeHub and IoTHub as destinations with 4 different transports (AMQP, AMQP-WS, MQTT, MQTT-WS).  This leads us to 8 different suites:
+* edgehub_module_amqp
+* edgehub_module_amqp_ws
+* edgehub_module_mqtt
+* edgehub_module_mqtt_ws
+* iothub_module_amqp
+* iothub_module_amqp_ws
+* iothub_module_mqtt
+* iothub_module_mqtt_ws
+
+All SDKs run all suites, with two exceptions:
+1. C and Python don't run edgehub_module_amqp and edgehub_module_amqpws
+2. PythonPreview only runs edgehub_module_mqtt and iothub_module_amqtt
+
 ## Test Cases
+
 
 ## Current Exclusions
 
 ## Current Pass Rates
 
 
+cmd
