@@ -62,8 +62,7 @@ class ModuleApi(AbstractModuleApi):
         raise NotImplementedError()
 
     def enable_input_messages(self):
-        # TODO : Should take input name as param ?
-        input_message_queue = self.sync_client.get_input_message_queue("input1")
+        pass
 
     def get_twin(self):
         raise NotImplementedError()
@@ -87,7 +86,10 @@ class ModuleApi(AbstractModuleApi):
         print("send confirmation received")
 
     def wait_for_input_event_async(self, input_name):
-        raise NotImplementedError()
+        print("Receiving input messages")
+        input_message_queue = self.sync_client.get_input_message_queue(input_name)
+        actual_message = input_message_queue.get()
+        return actual_message
 
     def call_module_method_async(self, device_id, module_id, method_invoke_parameters):
         raise NotImplementedError()
